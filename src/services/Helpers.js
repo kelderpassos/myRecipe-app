@@ -44,5 +44,3 @@ export const trimArray = (data, size, path) => {
   if (path.includes('foods')) return data.meals.slice(0, size);
   return data.drinks.slice(0, size);
 };
-
-console.log('Keldão bonitão');
