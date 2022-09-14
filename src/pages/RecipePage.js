@@ -1,25 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import ReactPlayer from 'react-player';
-import {
-  MEALS_TYPE, COCKTAILS_TYPE,
-  fetchRecipeById, fetchAllRecipes,
+import { Heart } from 'phosphor-react';
+import { MEALS_TYPE, COCKTAILS_TYPE, fetchRecipeById, fetchAllRecipes,
 } from '../services/RecipesAPI';
 import DefaultRecipeCard from '../components/DefaultRecipeCard';
-import {
-  recipeIsDone, recipeIsInProgress, recipeIsFavorite,
+import { recipeIsDone, recipeIsInProgress, recipeIsFavorite,
   saveFavoriteRecipe, saveInProgressRecipe, saveDoneRecipe,
-  removeFavoriteRecipe,
-  loadInProgressRecipeIngredients,
+  removeFavoriteRecipe, loadInProgressRecipeIngredients,
 } from '../services/StorageManager';
 import shareIcon from '../images/shareIcon.svg';
-import whiteHeartIcon from '../images/whiteHeartIcon.svg';
-import blackHeartIcon from '../images/blackHeartIcon.svg';
+import IngredientList from '../components/IngredientList';
+import Footer from '../components/Footer';
 
 const RECOMMENDATIONS_NUMBER = 6;
-
 const getCheckboxes = () => Array.from(document.querySelectorAll('.ingredient-checkbox'));
-
 const getStartButtonInnerText = (inProgress) => (
   inProgress ? 'Continue Recipe' : 'Start Recipe');
 
@@ -27,16 +22,23 @@ const getRecipeCategoryText = (isFood, recipe) => (
   isFood ? recipe.strCategory : recipe.strAlcoholic);
 
 const renderVideo = (isFood, url) => (isFood && (
-  <div>
-    <h3>Video</h3>
-    <ReactPlayer data-testid="video" url={ url } />
-  </div>));
+  <>
+    <div className="flex flex-col justified-center my-3">
+      <h3 className="text-center font-bold">Video</h3>
+    </div>
+    <ReactPlayer data-testid="video" url={ url } width="23rem" />
+  </>
+));
+
+const getHeartState = (id) => ({
+  color: recipeIsFavorite(id) ? 'red' : 'black',
+  weight: recipeIsFavorite(id) ? 'fill' : 'regular',
+});
 
 function RecipePage() {
   const [usedIngredients, setUsedIngredients] = useState([]);
   const [ingredientsList, setIngredientsList] = useState([]);
   const [copied, setCopied] = useState(false);
-  const [heartIcon, setHeartIcon] = useState(whiteHeartIcon);
   const [recipe, setRecipe] = useState({});
   const [recommendations, setRecommendations] = useState([]);
   const history = useHistory();
@@ -45,6 +47,8 @@ function RecipePage() {
   const id = params.foodId || params.drinkId;
   const isFood = path.includes('/foods');
   const isInProgressPath = path.includes('/in-progress');
+  const [heartColor, setHeartColor] = useState(getHeartState(id).color);
+  const [heartWeight, setHeartWeight] = useState(getHeartState(id).weight);
 
   useEffect(() => {
     const fetchAPI = async () => {
@@ -73,13 +77,10 @@ function RecipePage() {
           measure: entries.find((e) => e[0].includes(`Measure${i}`))[1],
         });
       }
-
       setIngredientsList(list.filter((el) => el.ingredient));
       setUsedIngredients(loadInProgressRecipeIngredients(id));
-      setHeartIcon(recipeIsFavorite(id) ? blackHeartIcon : whiteHeartIcon);
       setRecipe(recipeObject);
     };
-
     fetchAPI();
   }, [id, path, isFood, setIngredientsList]);
 
@@ -92,10 +93,12 @@ function RecipePage() {
   const onClickFavorite = () => {
     if (recipeIsFavorite(id)) {
       removeFavoriteRecipe(id);
-      setHeartIcon(whiteHeartIcon);
+      setHeartColor('black');
+      setHeartWeight('regular');
     } else {
       saveFavoriteRecipe(recipe);
-      setHeartIcon(blackHeartIcon);
+      setHeartColor('red');
+      setHeartWeight('fill');
     }
   };
 
@@ -122,112 +125,110 @@ function RecipePage() {
   const areAllIngredientsChecked = () => getCheckboxes()
     .every((box) => usedIngredients.includes(box.name));
 
-  const renderIngredientsList = () => {
-    if (isInProgressPath) {
-      return (
-        <ul>
-          {ingredientsList.map((el, index) => (
-            <li
-              key={ `${el.ingredient}${index}` }
-              data-testid={ `${index}-ingredient-step` }
-            >
-              <input
-                name={ el.ingredient }
-                data-testid={ `${index}-ingredient-checkbox` }
-                className="ingredient-checkbox"
-                type="checkbox"
-                defaultChecked={ usedIngredients.includes(el.ingredient) }
-                onChange={ handleProgressChange }
-              />
-              { `${el.ingredient} - ${el.measure}` }
-            </li>
-          ))}
-        </ul>);
-    }
-    return (
-      <ul>
-        {ingredientsList.map((el, index) => (
-          <li
-            key={ `${el.ingredient}${index}` }
-            data-testid={ `${index}-ingredient-name-and-measure` }
-          >
-            { `${el.ingredient} - ${el.measure}` }
-          </li>
-        ))}
-      </ul>);
-  };
+  const renderIngredientsList = () => (
+    <IngredientList
+      handleProgressChange={ handleProgressChange }
+      ingredientsList={ ingredientsList }
+      isInProgressPath={ isInProgressPath }
+      usedIngredients={ usedIngredients }
+    />
+  );
 
   return (
     <div>
-      <img
-        data-testid="recipe-photo"
-        src={ recipe.strMealThumb || recipe.strDrinkThumb }
-        alt="recipe thumb"
-      />
-      <h2 data-testid="recipe-title">{ recipe.strMeal || recipe.strDrink }</h2>
-      <button
-        type="button"
-        data-testid="share-btn"
-        onClick={ onClickShare }
-      >
-        <img src={ shareIcon } alt="share icon" />
-      </button>
+      <main className="mx-2">
+        <div className="flex justify-center mt-3 border-2 border-black">
+          <img
+            data-testid="recipe-photo"
+            src={ recipe.strMealThumb || recipe.strDrinkThumb }
+            alt="recipe thumb"
+            className="w-full"
+          />
+        </div>
 
-      {copied && <p>Link copied!</p>}
+        <header className=" mt-3">
+          <h2 data-testid="recipe-title" className="text-center font-bold">
+            { recipe.strMeal || recipe.strDrink }
+          </h2>
+          <p data-testid="recipe-category" className="text-center text-red-700 font-bold">
+            {getRecipeCategoryText(isFood, recipe)}
+          </p>
+        </header>
 
-      <button type="button" onClick={ onClickFavorite }>
-        <img data-testid="favorite-btn" src={ heartIcon } alt="favorite icon" />
-      </button>
+        <section className="flex justify-center space-x-40 mt-1">
+          <button type="button" data-testid="share-btn" onClick={ onClickShare }>
+            <img src={ shareIcon } alt="share icon" />
+          </button>
+          <button type="button" onClick={ onClickFavorite }>
+            <Heart size={ 31 } color={ heartColor } weight={ heartWeight } />
+          </button>
+        </section>
 
-      <p data-testid="recipe-category">
-        {getRecipeCategoryText(isFood, recipe)}
-      </p>
-      <h3>Ingredients</h3>
-      {renderIngredientsList()}
-      <h3>Instructions</h3>
-      <p data-testid="instructions">{ recipe.strInstructions }</p>
-      {!isInProgressPath && (
-        <div>
-          {renderVideo(isFood, recipe.strYoutube)}
+        {copied && <p className="text-center italic">Link copied!</p>}
 
-          <h3>Recommended</h3>
-          <div className="recommendations">
-            {recommendations.map((rec, index) => (
-              <DefaultRecipeCard
-                cardTestId={ `${index}-recomendation-card` }
-                titleTestId={ `${index}-recomendation-title` }
-                key={ rec.idDrink || rec.idMeal }
-                recipeId={ rec.idDrink || rec.idMeal }
-                index={ index }
-                thumb={ rec.strDrinkThumb || rec.strMealThumb }
-                name={ rec.strDrink || rec.strMeal }
-                category={ isFood ? rec.strAlcoholic : rec.strCategory }
-              />))}
+        <article className="mb-4">
+          <h3 className="text-center font-bold my-3">Ingredients</h3>
+          {renderIngredientsList()}
+          <h3 className="font-bold mt-3">Instructions:</h3>
+          <p data-testid="instructions" className="text-justify">
+            { recipe.strInstructions }
+          </p>
+        </article>
+        {isInProgressPath && (
+          <div className="flex justify-center mb-4">
+            <button
+              data-testid="finish-recipe-btn"
+              type="button"
+              onClick={ onClickFinish }
+              disabled={ !areAllIngredientsChecked() }
+              className="bg-white font-bold rounded-lg p-1 w-[15rem] my-3"
+            >
+              Finish Recipe
+            </button>
           </div>
-        </div>)}
-      {!recipeIsDone(id) && !isInProgressPath
+        )}
+        {!isInProgressPath && (
+          <div>
+            <section>
+              <div className="w-full">
+                {renderVideo(isFood, recipe.strYoutube)}
+              </div>
+              <div>
+                {!recipeIsDone(id) && !isInProgressPath
       && (
-        <button
-          className="details-button"
-          data-testid="start-recipe-btn"
-          type="button"
-          onClick={ onClickStart }
-        >
-          { getStartButtonInnerText(recipeIsInProgress(id)) }
-        </button>)}
+        <div className="flex items-center justify-center">
+          <button
+            data-testid="start-recipe-btn"
+            type="button"
+            onClick={ onClickStart }
+            className="bg-white font-bold rounded-lg p-1 w-[15rem] my-3 "
+          >
+            { getStartButtonInnerText(recipeIsInProgress(id)) }
+          </button>
+        </div>
+      )}
+              </div>
+            </section>
+            <h3 className="mt-3 font-bold">Recommended:</h3>
 
-      {isInProgressPath && (
-        <button
-          className="details-button"
-          data-testid="finish-recipe-btn"
-          type="button"
-          onClick={ onClickFinish }
-          disabled={ !areAllIngredientsChecked() }
-        >
-          Finish Recipe
-        </button>)}
+            <nav className="recommendations">
+              {recommendations.map((rec, index) => (
+                <DefaultRecipeCard
+                  cardTestId={ `${index}-recomendation-card` }
+                  titleTestId={ `${index}-recomendation-title` }
+                  key={ rec.idDrink || rec.idMeal }
+                  recipeId={ rec.idDrink || rec.idMeal }
+                  index={ index }
+                  thumb={ rec.strDrinkThumb || rec.strMealThumb }
+                  name={ rec.strDrink || rec.strMeal }
+                  category={ isFood ? rec.strAlcoholic : rec.strCategory }
+                />))}
+            </nav>
+          </div>
+        )}
+      </main>
+      <Footer />
     </div>
   );
 }
-
 export default RecipePage;

@@ -34,6 +34,7 @@ function DropDownMenu() {
     <select
       data-testid="explore-by-nationality-dropdown"
       onChange={ onOptionChanged }
+      className="bg-gray-400 p-2 my-3 rounded-md"
     >
       {options.map((opt, index) => (
         <option

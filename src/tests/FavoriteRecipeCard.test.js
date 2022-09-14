@@ -13,7 +13,6 @@ describe.only('Testa o componente FavoriteRecipesCard', () => {
     userEvent.click(bttnFavorite);
     history.push(FAVORITE_RECIPES);
     expect(history.location.pathname).toBe(FAVORITE_RECIPES);
-    // expect(bttnFavorite).toBeInTheDocument();
     const etonMessSearch = await screen.findByTestId('0-horizontal-name');
     const etonMessImg = await screen.findByTestId('0-horizontal-image');
     expect(etonMessSearch).toBeInTheDocument();

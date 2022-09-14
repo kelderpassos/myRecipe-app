@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import { MagnifyingGlass, User } from 'phosphor-react';
 import RecipesContext from '../context/RecipesContext';
 import {
   MEALS_TYPE, COCKTAILS_TYPE,
@@ -7,8 +8,6 @@ import {
   fetchRecipesByFirstLetter, fetchAllRecipes,
 } from '../services/RecipesAPI';
 import { trimArray, verifyPageTitle } from '../services/Helpers';
-import ProfileIcon from '../images/profileIcon.svg';
-import SearchIcon from '../images/searchIcon.svg';
 import DropDownMenu from './DropDownMenu';
 
 const RECIPES_NUMBER = 12;
@@ -83,7 +82,6 @@ function Header() {
     }
 
     if (newRecipes && newRecipes.length === 1) {
-      console.log(newRecipes[0]);
       history.push(getNewPath(path, newRecipes[0]));
     } else {
       setRecipes(newRecipes);
@@ -91,45 +89,48 @@ function Header() {
   };
 
   return (
-    <header>
+    <header className="bg-red-600 flex flex-col justify-center items-center">
       <div>
-        <section>
+        <section className="flex justify-center items-center space-x-[3rem] mt-1 mb-2">
           <Link
             to="/profile"
           >
-            <img
-              data-testid="profile-top-btn"
-              src={ ProfileIcon }
-              alt="ProfileIcon"
-            />
+            <User size={ 35 } className="text-white" />
           </Link>
-          <h2 data-testid="page-title">{pageTitle}</h2>
+          <p
+            data-testid="page-title"
+            className="mt-2
+            w-[12rem]
+            text-white text-center font-bold tracking-wide"
+          >
+            {pageTitle}
+          </p>
           {renderSearchIcon && (
             <button
               type="button"
               onClick={ handleSearchIcon }
             >
-              <img data-testid="search-top-btn" src={ SearchIcon } alt="SearchIcon" />
+              <MagnifyingGlass size={ 35 } className="text-white" />
             </button>)}
-          {renderSearchBar && (
-            <input
-              placeholder="Digite Aqui"
-              type="text"
-              data-testid="search-input"
-              name="searchInput"
-              value={ searchInput }
-              onChange={ handleInputBarChange }
-            />
-          )}
-          {renderDropDown && <DropDownMenu />}
         </section>
-        <br />
       </div>
-      <br />
+      <div>
+        {renderSearchBar && (
+          <input
+            type="text"
+            data-testid="search-input"
+            name="searchInput"
+            value={ searchInput }
+            onChange={ handleInputBarChange }
+            className="flex justify-center items-center mt-4 mb-4 pl-1"
+          />
+        )}
+      </div>
+      {renderDropDown && <DropDownMenu />}
       <div>
         {renderSearchIcon && (
-          <section>
-            <label htmlFor="Ingredient">
+          <section className="mt-1">
+            <label htmlFor="Ingredient" className="mr-2 text-white tracking-wide">
               <input
                 data-testid="ingredient-search-radio"
                 id="Ingredient"
@@ -137,10 +138,11 @@ function Header() {
                 name="filter"
                 value={ serchFilter }
                 onChange={ handleChangeFilters }
+                className="mr-1"
               />
               Ingredient
             </label>
-            <label htmlFor="Name">
+            <label htmlFor="Name" className="mr-2 text-white tracking-wide">
               <input
                 data-testid="name-search-radio"
                 id="Name"
@@ -148,10 +150,11 @@ function Header() {
                 name="filter"
                 value={ serchFilter }
                 onChange={ handleChangeFilters }
+                className="mr-1"
               />
               Name
             </label>
-            <label htmlFor="First-Letter">
+            <label htmlFor="First-Letter" className="mr-1 text-white tracking-wide">
               <input
                 data-testid="first-letter-search-radio"
                 id="First-Letter"
@@ -159,23 +162,38 @@ function Header() {
                 name="filter"
                 value={ serchFilter }
                 onChange={ handleChangeFilters }
+                className="mr-1"
               />
               First letter
             </label>
-            <br />
-            <button
-              type="button"
-              data-testid="exec-search-btn"
-              onClick={ onClickSearch }
-            >
-              Search
-            </button>
+            <div className="flex justify-center items-center my-1">
+              <button
+                type="button"
+                data-testid="exec-search-btn"
+                onClick={ onClickSearch }
+                className="tracking-wide
+                mt-2 mb-3 bg-gray-300
+                px-5
+                rounded-md"
+              >
+                Search
+              </button>
+            </div>
           </section>
         )}
       </div>
-
     </header>
   );
 }
 
 export default Header;
+
+// className="flex justify-center items-center mt-4 mb-4 ml-[4rem]"
+// className="space-x-5 text-white font-semibold"
+// className="mr-3"
+
+//
+//
+//
+//
+//

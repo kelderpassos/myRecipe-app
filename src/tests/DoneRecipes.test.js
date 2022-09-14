@@ -5,7 +5,7 @@ import renderWithRouter from './Helpers/renderWithRouter';
 import App from '../App';
 
 describe.only('Testa o componente DoneRecipes', () => {
-  it('Testar button de compartilhar da pagina DoneRecipes', async () => {
+  it('Testa o botão de compartilhar da pagina DoneRecipes', async () => {
     const { history } = renderWithRouter(<App />);
     history.push('/foods/52791');
     const startRecipe = await screen.findByTestId('start-recipe-btn');

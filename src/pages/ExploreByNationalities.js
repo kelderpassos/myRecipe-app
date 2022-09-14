@@ -7,10 +7,14 @@ function ExploreByNationalities() {
   return (
     <div data-testid="nationalities-page">
       <Header />
-      <MainRecipeList />
+      <main className="flex flex-col justify-center items-center">
+        <MainRecipeList />
+      </main>
       <Footer />
     </div>
   );
 }
 
 export default ExploreByNationalities;
+
+// main "

@@ -4,18 +4,24 @@ import PropTypes from 'prop-types';
 function RecipeFilterButtons(props) {
   const { categories, onButtonClicked } = props;
   return (
-    <nav>
+    <section
+      className="
+      flex flex-wrap justify-center items-center
+      space-x-1.5 text-sm  my-2"
+    >
       {categories.map((cat, index) => (
         <button
           data-testid={ `${cat}-category-filter` }
           key={ index }
           type="button"
           onClick={ onButtonClicked }
+          className="bg-white p-1
+          rounded-md
+          my-2"
         >
           { cat }
-
         </button>))}
-    </nav>
+    </section>
   );
 }
 
